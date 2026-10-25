@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>LoteVivo · Editor</title>
+  <meta name="robots" content="noindex">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/app.css?v=20261024b">
+  <link rel="stylesheet" href="css/editor.css?v=20261024b">
+</head>
+<body class="editor">
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="t-select" viewBox="0 0 24 24"><path d="m4 3 7 17 2.5-7.5L21 10z"/></symbol>
+    <symbol id="t-poly" viewBox="0 0 24 24"><path d="m5 7 6-3 8 5-2 10-11-2z"/><circle cx="5" cy="7" r="1.6"/><circle cx="11" cy="4" r="1.6"/><circle cx="19" cy="9" r="1.6"/><circle cx="17" cy="19" r="1.6"/><circle cx="6" cy="17" r="1.6"/></symbol>
+    <symbol id="t-wand" viewBox="0 0 24 24"><path d="m4 20 11-11M14 4v3M18.5 5.5l-2 2M20 10h-3M12 6.5 13 8"/><path d="m15 9-1-1"/></symbol>
+    <symbol id="t-pin" viewBox="0 0 24 24"><path d="M12 22s7-6.2 7-12a7 7 0 0 0-14 0c0 5.8 7 12 7 12z"/><circle cx="12" cy="10" r="2.5"/></symbol>
+    <symbol id="t-ruler" viewBox="0 0 24 24"><path d="m3 17 14-14 4 4L7 21z"/><path d="m7 13 2 2M10 10l2 2M13 7l2 2"/></symbol>
+    <symbol id="t-undo" viewBox="0 0 24 24"><path d="M9 14 4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/></symbol>
+    <symbol id="t-fit" viewBox="0 0 24 24"><path d="M8 3H3v5M16 3h5v5M3 16v5h5M21 16v5h-5"/></symbol>
+    <symbol id="t-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="t-minus" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
+    <symbol id="t-up" viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/></symbol>
+    <symbol id="t-down" viewBox="0 0 24 24"><path d="M12 5v14M5 12l7 7 7-7"/></symbol>
+    <symbol id="t-eye" viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></symbol>
+    <symbol id="t-img" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="m21 16-5-5-9 9"/></symbol>
+    <symbol id="t-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></symbol>
+    <symbol id="t-table" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M3 15h18M9 4v16"/></symbol>
+    <symbol id="t-file" viewBox="0 0 24 24"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/></symbol>
+    <symbol id="t-spark" viewBox="0 0 24 24"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5 18 18M6 18l2.5-2.5M15.5 8.5 18 6"/></symbol>
+    <symbol id="t-dot" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 0 1 0 16z" fill="currentColor"/></symbol>
+    <symbol id="t-trash" viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
+  </svg>
+
+  <header class="ed-top">
+    <a class="ed-brand" href="index.html?rascunho" title="Ver experiência"><span class="brand-mark"></span><b>LoteVivo</b><span>editor</span></a>
+    <input id="eName" class="ed-name" aria-label="Nome do loteamento" placeholder="Nome do loteamento">
+    <div class="ed-actions">
+      <div class="menu">
+        <button class="btn" data-menu="mImport"><svg><use href="#t-down"/></svg><span>Importar</span></button>
+        <div class="menu-pop" id="mImport">
+          <button data-do="pacote"><svg><use href="#t-spark"/></svg><span><b>Projeto completo: KMZ + planta em PDF</b><small>Recomendado. Lotes exatos do CAD, numerados pela planta, com preços e situação da tabela.</small></span></button>
+          <button data-do="img"><svg><use href="#t-img"/></svg><span><b>Imagem do mapa</b><small>JPG/PNG da planta ou arte. Você desenha ou usa a varinha.</small></span></button>
+          <button data-do="kml"><svg><use href="#t-globe"/></svg><span><b>Só KML ou KMZ</b><small>Lotes desenhados e medidos, numeração pelo nome de cada polígono.</small></span></button>
+          <button data-do="csv"><svg><use href="#t-table"/></svg><span><b>Planilha de preços (CSV)</b><small>Colunas quadra; lote; preco; area; situacao…</small></span></button>
+          <button data-do="json"><svg><use href="#t-file"/></svg><span><b>Projeto salvo (.json)</b><small>Um projeto exportado antes.</small></span></button>
+        </div>
+      </div>
+      <div class="menu">
+        <button class="btn" data-menu="mExport"><svg><use href="#t-up"/></svg><span>Exportar</span></button>
+        <div class="menu-pop right" id="mExport">
+          <button data-do="exJson"><svg><use href="#t-file"/></svg><span><b>projeto.json</b><small>Para publicar: coloque ao lado do index.html.</small></span></button>
+          <button data-do="exSlug"><svg><use href="#t-file"/></svg><span><b>Loteamento extra (projetos/nome.json)</b><small>Para ter vários loteamentos no mesmo site. Abre com ?p=nome.</small></span></button>
+          <button data-do="exCsv"><svg><use href="#t-table"/></svg><span><b>Planilha CSV</b><small>Abre no Excel. Edite preços e importe de volta.</small></span></button>
+        </div>
+      </div>
+      <span class="save-state" id="saveState">Salvo</span>
+      <a class="btn primary" href="index.html?rascunho" target="lotevivo-view"><svg><use href="#t-eye"/></svg><span>Ver em 3D</span></a>
+    </div>
+  </header>
+
+  <div class="ed-main">
+    <nav class="ed-tools" aria-label="Ferramentas">
+      <button data-tool="select" title="Selecionar e mover vértices (V)"><svg><use href="#t-select"/></svg><kbd>V</kbd></button>
+      <button data-tool="poly" title="Desenhar contorno do lote (P)"><svg><use href="#t-poly"/></svg><kbd>P</kbd></button>
+      <button data-tool="wand" title="Varinha: clique dentro do lote na imagem (W)"><svg><use href="#t-wand"/></svg><kbd>W</kbd></button>
+      <button data-tool="pin" title="Só um pino no lote (I)"><svg><use href="#t-pin"/></svg><kbd>I</kbd></button>
+      <button data-tool="scale" title="Calibrar escala: meça uma distância conhecida (S)"><svg><use href="#t-ruler"/></svg><kbd>S</kbd></button>
+      <button data-tool="status" title="Situação: clique no lote para alternar Disponível (verde) e Vendido (vermelho) (D)"><svg><use href="#t-dot"/></svg><kbd>D</kbd></button>
+      <hr>
+      <button data-z="in" title="Aproximar"><svg><use href="#t-plus"/></svg></button>
+      <button data-z="out" title="Afastar"><svg><use href="#t-minus"/></svg></button>
+      <button data-z="fit" title="Enquadrar"><svg><use href="#t-fit"/></svg></button>
+      <button id="bUndo" title="Desfazer (Ctrl+Z)"><svg><use href="#t-undo"/></svg></button>
+    </nav>
+
+    <div class="ed-canvas" id="wrap">
+      <svg id="edSvg" class="ed-svg"></svg>
+      <div class="ed-ctx" id="ctx"></div>
+      <div class="ed-empty" id="empty" hidden>
+        <h2>Como você quer começar?</h2>
+        <p class="muted">Dá para trocar depois. Tudo fica salvo neste navegador até você exportar.</p>
+        <div class="starts">
+          <button data-do="pacote" class="rec"><svg><use href="#t-spark"/></svg><b>Tenho o KMZ e a planta em PDF</b><span>O jeito mais exato: lotes do CAD, numerados pela planta, com relevo do terreno, preços e situação da tabela.</span></button>
+          <button data-do="img"><svg><use href="#t-img"/></svg><b>Tenho a imagem do mapa</b><span>A arte ou a planta do loteamento. Clique em cada lote com a varinha e ele é contornado sozinho.</span></button>
+          <button data-do="kml"><svg><use href="#t-globe"/></svg><b>Tenho o KML / KMZ</b><span>Exportado do Google Earth ou do AutoCAD. Os lotes entram já georreferenciados e com área calculada, e a foto de satélite vem junto.</span></button>
+          <button data-do="demo"><svg><use href="#t-spark"/></svg><b>Ver um exemplo pronto</b><span>Um loteamento fictício com 230 lotes para você explorar as ferramentas.</span></button>
+        </div>
+      </div>
+    </div>
+
+    <aside class="ed-side">
+      <div class="tabs" role="tablist">
+        <button data-tab="lote" class="on">Lote</button>
+        <button data-tab="lotes">Lotes</button>
+        <button data-tab="planos">Planos</button>
+        <button data-tab="projeto">Projeto</button>
+        <button data-tab="ajuda">Ajuda</button>
+      </div>
+      <div class="tab-body" id="tabBody"></div>
+    </aside>
+  </div>
+
+  <input type="file" id="fImg" accept="image/*" hidden>
+  <input type="file" id="fKml" accept=".kml,.kmz,application/vnd.google-earth.kml+xml,application/vnd.google-earth.kmz" hidden>
+  <input type="file" id="fCsv" accept=".csv,.txt,text/csv" hidden>
+  <input type="file" id="fJson" accept=".json,application/json" hidden>
+  <div id="impModal" class="modal" hidden role="dialog" aria-modal="true" aria-labelledby="impTitle"></div>
+  <div id="toast" class="toast" role="status"></div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script src="js/store.js?v=20261024b"></script>
+  <script src="js/sim.js?v=20261024b"></script>
+  <script src="js/map2d.js?v=20261024b"></script>
+  <script src="js/importar-planta.js?v=20261024b"></script>
+  <script src="js/importers.js?v=20261024b"></script>
+  <script src="js/editor.js?v=20261024b"></script>
+</body>
+</html>

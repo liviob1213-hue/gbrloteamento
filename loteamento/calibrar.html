@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>LoteVivo · Calibrar foto aérea</title>
+  <meta name="robots" content="noindex">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/app.css?v=20261024b">
+  <link rel="stylesheet" href="css/realista.css?v=20261024b">
+  <style>
+    body { margin: 0; height: 100vh; overflow: hidden; font-family: var(--font); background: #000; color: var(--text); }
+    .cal-stage { position: fixed; inset: 0; }
+    .cal-bar { position: fixed; top: 8px; left: 8px; z-index: 50; display: flex; gap: 8px; align-items: center; padding: 8px 10px; border-radius: 12px; flex-wrap: wrap; max-width: calc(100vw - 16px); }
+    .cal-bar.hid { opacity: 0; pointer-events: none; }
+    .cal-bar .btn { padding: 7px 10px; font-size: 12.5px; }
+    .cal-bar label { display: flex; align-items: center; gap: 6px; font-size: 12.5px; color: var(--muted); }
+    .cal-bar input[type=range] { width: 120px; accent-color: var(--gold); }
+    .cal-help { position: fixed; bottom: 12px; left: 12px; right: 12px; z-index: 50; text-align: center; font-size: 12.5px; color: var(--muted); background: rgba(10,16,14,.7); padding: 8px 12px; border-radius: 10px; backdrop-filter: blur(8px); }
+    .cal-help b { color: var(--gold-2); }
+  </style>
+</head>
+<body>
+  <div class="cal-stage" id="stage"></div>
+  <div class="cal-bar glass">
+    <b style="font-size:14px">Calibrar foto aérea</b>
+    <label>Planta <input type="range" id="op" min="0" max="1" step="0.05" value="0.5"></label>
+    <button class="btn" id="add">+ ponto</button>
+    <button class="btn" id="grid">Grade</button>
+    <button class="btn primary" id="save">Salvar no projeto</button>
+    <button class="btn" id="dl">Baixar projeto.json</button>
+    <a class="btn" href="index.html?rascunho#real" target="_blank">Ver no site</a>
+  </div>
+  <div class="cal-help">Arraste os <b>pontos numerados</b> até cada marco da planta cair sobre o mesmo lugar na foto (comece pela <b>rotatória</b>). Use a opacidade para comparar. Role para dar zoom.</div>
+
+  <script src="js/store.js?v=20261024b"></script>
+  <script src="js/sim.js?v=20261024b"></script>
+  <script src="js/realista.js?v=20261024b"></script>
+  <script>
+    (async function () {
+      const LV = window.LV;
+      let p = await LV.store.loadDraft();
+      if (!p || !p.lots) { try { const r = await fetch('projeto.json', { cache: 'no-store' }); if (r.ok) p = await r.json(); } catch (e) {} }
+      if (!p) { document.getElementById('stage').innerHTML = '<p style="padding:40px;text-align:center">Nenhum projeto. Abra o editor primeiro.</p>'; return; }
+      p = LV.migrate(p);
+      if (!p.realista) p.realista = { image: 'mapas/jardim-das-gerais-aerea.jpg', w: 2000, h: 1125, points: [[p.W * 0.37, p.H * 0.37, 1125, 515], [p.W * 0.8, p.H * 0.5, 1450, 430], [p.W * 0.5, p.H * 0.18, 1240, 250], [p.W * 0.27, p.H * 0.62, 700, 790]] };
+      const cal = new LV.Calibrator(document.getElementById('stage'), p, (pts) => { p.realista.points = pts; });
+      window.cal = cal; window.proj = p;
+      window.setPts = (pts) => { cal.pts = pts.map((q) => q.slice()); cal._apply(); cal._mkHandles(); p.realista.points = cal.points(); };
+      document.getElementById('op').oninput = (e) => cal.setOpacity(+e.target.value);
+      document.getElementById('add').onclick = () => cal.addPoint();
+      document.getElementById('grid').onclick = () => document.getElementById('stage').classList.toggle('show-grid');
+      document.getElementById('save').onclick = async () => { p.realista.points = cal.points(); await LV.store.save(p); document.getElementById('save').textContent = 'Salvo ✓'; setTimeout(() => (document.getElementById('save').textContent = 'Salvar no projeto'), 1500); };
+      document.getElementById('dl').onclick = () => { p.realista.points = cal.points(); LV.download('projeto.json', JSON.stringify(p)); };
+    })();
+  </script>
+</body>
+</html>
