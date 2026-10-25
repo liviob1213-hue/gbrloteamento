@@ -1,74 +1,70 @@
-# Grupo GBR — site institucional (MVP one-page)
+# LoteVivo: loteamento em 3D
 
-Recriação da home do [grupogbrmg.com.br](https://grupogbrmg.com.br/) em HTML/CSS/JS puro,
-com animações GSAP + ScrollTrigger e scroll suave (Lenis). Sem build, sem framework:
-sobe em qualquer hospedagem estática (Hostinger, Vercel, Netlify, cPanel, S3...).
+- `index.html`: o site do cliente, com as abas **3D · Mapa · Real · Grade · Tabela**, filtros, comparação, simulador e PDF.
+- `editor.html`: onde o loteamento é montado e mantido (situação, preços, planos).
+- `calibrar.html`: encaixe da foto de drone no modo Real.
 
-## Como rodar localmente
+Para rodar localmente: `npx serve -l 5178 .` e abrir `http://localhost:5178/`.
 
-```bash
-npx serve -l 5178 .
+As três páginas ficam na raiz, então na hospedagem (Vercel) as rotas são `/`, `/editor.html`
+e `/calibrar.html`.
+
+## Numeração no mapa
+
+Nos três mapas (**3D**, **Mapa** e **Real**) o número da quadra aparece com o loteamento
+inteiro à vista, em etiquetas do mesmo tamanho em qualquer zoom. Clicar numa etiqueta leva
+o mapa até aquela quadra; aí o número de cada lote aparece por cima do desenho. Quando duas
+etiquetas se encavalam — no celular, ou com o mapa bem aberto — a quadra maior fica com a
+vez e a outra reaparece quando o zoom entra.
+
+Os mesmos atalhos existem fora do mapa: o título **Quadra NN** em "Explorar" e na aba
+**Grade** leva até ela, e digitar só o número da quadra na busca (`41`, `q41`, `quadra 41`)
+também. Com quadra e lote (`41-04`), a busca continua abrindo o lote direto.
+
+## Jardim das Gerais (fase 1)
+
+Montado com os arquivos oficiais:
+
+- **Lotes:** os polígonos do **KMZ do CAD** (`Jardim das Geraes - Kml 2026.kmz`), com o desenho exato de cada lote.
+- **Numeração:** vem da **planta em PDF** (`Planta Jardim das Gerais fase 1.pdf`). Entram só os lotes numerados nela, que são a fase 1: quadras 01–11, 30–46 e a 54 (rotatória). São 275 lotes, e a quantidade por quadra confere com a tabela "Quantidade de lotes e áreas" da planta.
+- **Preço e situação:** iguais aos da tabela da C2X de outubro/2026 (`mapas/jardim-das-gerais-c2x-2026-10.json`). São 233 disponíveis com preço, e o restante da fase 1 está como vendido.
+- **Calculado da geometria real:** frente, fundo, esquina e para onde a frente aponta (com o norte certo).
+- **Relevo do terreno:** vem das curvas de nível do KMZ (788 a 1.089 m) e é usado no 3D.
+- **Mapa-base:** `mapas/jardim-das-gerais-base.jpg` é desenhado do próprio CAD: ruas, praça, áreas verdes, institucionais e fase 2 apagada.
+
+Ponto para confirmar: no **41-04** a planta escreve 1.396,08 m², mas o lote desenhado mede ~1.016 m² (igual aos vizinhos). O site mostra 1.396,08, que é o valor da tabela.
+
+## Marcar vendido / disponível
+
+No editor, use a ferramenta **Situação** (tecla **D**): cada clique num lote alterna **Disponível (verde) ↔ Vendido (vermelho)**, e Shift+clique marca Reservado. Também dá para editar pelo painel do lote, ou em massa pela planilha (`Exportar → Planilha CSV`, editar no Excel, `Importar → Planilha`).
+
+Depois, para publicar: **Exportar → projeto.json** e substitua o arquivo no site (Netlify).
+
+## Novo loteamento (ou atualizar este) a partir de KMZ + PDF
+
+No editor: **Importar → Projeto completo: KMZ + planta em PDF**. Escolha:
+
+1. o **KMZ/KML do CAD** (precisa ter a camada de lotes em polígonos; meio-fio e curvas de nível, se houver, viram ruas e relevo);
+2. a **planta em PDF** exportada do CAD (com texto, não escaneada); só entram os lotes que têm número nela;
+3. opcional: a **tabela de preços** (CSV `quadra;lote;area;preco;situacao`, ou o JSON no formato da C2X).
+
+A ferramenta encaixa a planta no desenho sozinha. Ela lê a escala impressa no PDF, acha rotação e posição e confere a contagem com a tabela da planta. Depois mostra um relatório com o que precisa de atenção. Tudo roda no navegador.
+
+O mesmo processo existe por linha de comando (gera o mapa-base com mais qualidade):
+
+```
+npm i jszip@3 pdfjs-dist@3.11.174 jpeg-js @resvg/resvg-js
+node tools/importar-kmz-pdf.cjs --kmz "arquivo.kmz" --pdf "planta.pdf" --precos tabela.csv --slug nome --nome "Nome"
 ```
 
-Depois abra `http://localhost:5178`. (Abrir o `index.html` direto pelo Explorer também
-funciona, mas o `<iframe>` do Google Maps pode reclamar.)
+## Vários loteamentos no mesmo site
 
-## Estrutura
+- `projeto.json` é o loteamento principal (abre em `/`).
+- Outros: no editor, **Exportar → Loteamento extra**, coloque o arquivo em `projetos/<nome>.json` e abra `/?p=<nome>`.
 
-```
-index.html            página inteira
-css/style.css         design system + responsivo
-js/main.js            GSAP, ScrollTrigger, menu, acordeão, formulário
-assets/
-  video/              ← COLOQUE AQUI o hero.mp4 (ver LEIA-ME.txt)
-  img/brand/          logotipos Grupo GBR
-  img/empreendimentos/ logomarcas dos empreendimentos
-  img/icons/          as 12 etapas do processo
-  img/social/         posts do Instagram
-```
+## Arquivos
 
-## O vídeo da hero
-
-Coloque o arquivo em `assets/video/hero.mp4`. O site detecta sozinho:
-enquanto o arquivo não existir, a hero exibe um fundo gradiente animado
-(nada quebra). Detalhes e comando de compressão em `assets/video/LEIA-ME.txt`.
-
-## Seções (todas com tópico + link, como no site atual)
-
-| Seção | Link / CTA |
-|---|---|
-| Hero | `#empreendimentos` · `#grupo` |
-| Destaque — Jardim das Gerais | https://loteamento-hero.lovable.app/ |
-| Lançamentos (3 cards) | `/category/lancamento/` + link por card |
-| Faixa — incorporação | `#parceiro` |
-| O Grupo | `/quem-somos/` |
-| Serviços (acordeão, 4 frentes) | `/servicos` |
-| Empreendimentos (3 cards) | `/empreendimentos/` + link por card |
-| Seja parceiro — 12 etapas do processo | `#contato` |
-| Força de vendas | `/forca-de-vendas/` |
-| Últimas unidades (3 cards) | `/category/ultimas-unidades/` + link por card |
-| Redes sociais | Instagram @grupogbrmg |
-| Fale conosco | formulário → WhatsApp, telefone, e-mail, mapa |
-
-## O que foi removido
-
-Toda referência à **Fort Estratégia Imobiliária**: o logotipo na seção
-"Nossa força de vendas" e a menção no texto institucional. O texto do grupo agora
-cita apenas **GBR Empreendimentos** e **GBR Serviços** — todo o resto do conteúdo
-daquela seção (as 6 atribuições da força de vendas) foi mantido.
-
-## Pontos para você conferir / ajustar
-
-1. **Números da hero** (`index.html`, bloco `.hero__bar`): "15+ anos", "3 segmentos",
-   "100% projetos legalizados". Confirme com o cliente antes de publicar.
-2. **WhatsApp**: hoje aponta para `5531995100776` (número divulgado no Instagram deles).
-   Está em dois lugares: no botão flutuante (`index.html`, `<a class="wa">`) e na
-   constante `WA` em `js/main.js`.
-3. **Formulário**: MVP sem backend — valida os campos e abre o WhatsApp com a mensagem
-   pronta. Para enviar por e-mail, troque o `submit` por Formspree / API própria.
-4. **Imagens dos empreendimentos**: as que o site atual tem são as *logomarcas*, não
-   fotos. Por isso os cards usam fundo branco com a marca centralizada. Se o cliente
-   enviar fotos reais, troque os arquivos em `assets/img/empreendimentos/` e remova a
-   classe `card__media--logo` do card correspondente.
-5. **Cor de destaque**: o dourado `--gold: #C2A24C` foi adicionado ao navy original
-   (`#171E35` / `#1B203E`) para dar o ar premium. Está centralizado no `:root` do CSS.
+- `js/importar-planta.js`: o importador KMZ + PDF (compartilhado entre o editor e a linha de comando).
+- `tools/importar-kmz-pdf.cjs`: o mesmo, por linha de comando. `tools/exportar-tabela.cjs` gera a planilha de todos os lotes.
+- `tools/montar-por-imagem.cjs`: o método antigo (a partir só da imagem do mapa), para quando não houver KMZ.
+- `mapas/jardim-das-gerais-aerea.jpg`: foto de drone do modo Real. A calibração foi convertida automaticamente para os lotes do KMZ; ajuste fino em `calibrar.html`.

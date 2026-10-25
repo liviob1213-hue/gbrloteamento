@@ -218,6 +218,14 @@ window.LV = window.LV || {};
       this.handles = document.createElement('div'); this.handles.className = 'rz-handles';
       el.appendChild(world); el.appendChild(this.handles);
       this.pan = new LV.WorldPan(el, world, r.w, r.h, null);
+      // a página pode medir zero antes do primeiro layout, e aí a foto fica invisível:
+      // quando o tamanho chega, refaz o enquadramento
+      this._ro = new ResizeObserver(() => {
+        if (this.pan.s > 0 && isFinite(this.pan.s)) return;
+        if (!el.getBoundingClientRect().width) return;
+        this.pan.fit(); this._handlePos();
+      });
+      this._ro.observe(el);
       this.opacity = 0.5;
       this._apply();
       this._mkHandles();
