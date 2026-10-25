@@ -1,13 +1,24 @@
 # LoteVivo: loteamento em 3D
 
-- `index.html`: o site do cliente, com as abas **3D · Mapa · Real · Grade · Tabela**, filtros, comparação, simulador e PDF.
-- `editor.html`: onde o loteamento é montado e mantido (situação, preços, planos).
-- `calibrar.html`: encaixe da foto de drone no modo Real.
+- `loteamento/index.html`: o site do cliente, com as abas **3D · Mapa · Real · Grade · Tabela**, filtros, comparação, simulador e PDF.
+- `loteamento/editor.html`: onde o loteamento é montado e mantido (situação, preços, planos).
+- `loteamento/calibrar.html`: encaixe da foto de drone no modo Real.
 
-Para rodar localmente: `npx serve -l 5178 .` e abrir `http://localhost:5178/`.
+Para rodar localmente: `npx serve -l 5178 .` e abrir `http://localhost:5178/loteamento/`
+(com a barra no final).
 
-As três páginas ficam na raiz, então na hospedagem (Vercel) as rotas são `/`, `/editor.html`
-e `/calibrar.html`.
+## Rotas na Vercel
+
+| Rota | Página |
+|---|---|
+| `/loteamento/` | o mapa público |
+| `/loteamento/editor.html` | o editor |
+| `/loteamento/calibrar.html` | o calibrador da foto aérea |
+
+A raiz `/` redireciona para `/loteamento/`. Quem configura isso é o `vercel.json`, que também
+liga o `trailingSlash`: sem a barra no final, os caminhos relativos das páginas (`css/`, `js/`,
+`mapas/`) sairiam errados. **As páginas precisam de `.html` no fim** — `/loteamento/editor`
+dá 404, porque `cleanUrls` está desligado.
 
 ## Numeração no mapa
 
@@ -59,8 +70,8 @@ node tools/importar-kmz-pdf.cjs --kmz "arquivo.kmz" --pdf "planta.pdf" --precos 
 
 ## Vários loteamentos no mesmo site
 
-- `projeto.json` é o loteamento principal (abre em `/`).
-- Outros: no editor, **Exportar → Loteamento extra**, coloque o arquivo em `projetos/<nome>.json` e abra `/?p=<nome>`.
+- `loteamento/projeto.json` é o loteamento principal (abre em `/loteamento/`).
+- Outros: no editor, **Exportar → Loteamento extra**, coloque o arquivo em `loteamento/projetos/<nome>.json` e abra `/loteamento/?p=<nome>`.
 
 ## Arquivos
 
